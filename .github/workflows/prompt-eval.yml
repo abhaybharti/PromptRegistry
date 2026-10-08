@@ -1,0 +1,45 @@
+name: Prompt Evaluation
+
+on:
+  pull_request:
+    paths:
+      - 'prompts/**'
+      - 'datasets/**'
+      - 'promptfooconfig.yaml'
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # needed for before/after comparison
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Cache promptfoo
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/promptfoo
+          key: promptfoo-${{ hashFiles('prompts/**', 'datasets/**') }}
+
+      - name: Run Promptfoo evaluation
+        uses: promptfoo/promptfoo-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          config: promptfooconfig.yaml
+          prompts: 'prompts/**/*.md'
+          cache-path: ~/.cache/promptfoo
+
+      # Optional: fail the check if quality drops below threshold
+      - name: Quality gate
+        run: |
+          # Parse results and fail if regressions detected
+          # (Promptfoo action already posts a summary comment)

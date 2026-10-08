@@ -1,0 +1,17 @@
+id: customer-support.reply-agent
+version: 2.3.1                    # Semantic versioning
+owner: support-platform-team
+description: Generates empathetic customer replies
+model:
+  provider: openai
+  name: gpt-4o
+  temperature: 0.2
+  max_tokens: 1024
+variables:
+  - name: user_message
+    required: true
+  - name: context
+    required: false
+tags: [production-critical, support]
+created_by: alice
+last_reviewed: 2026-10-01
